@@ -46,12 +46,15 @@ start() {
 
 	
 	if [[ "${DELUGEUI_START}" == "true" ]] ; then
-		ebegin "Starting Deluge"
-		start-stop-daemon --start --background --pidfile \
-		/var/run/deluge.pid  --make-pidfile \
-		--exec /usr/bin/deluge -c "${DELUGED_USER}" \
-		-e HOME="${DELUGED_USER_HOME}" -- ${DELUGEUI_OPTS}
-		eend $?
+		DELUGEUI_BINARY="$(which deluge-${DELUGEUI_TYPE})"
+		if [[ -x ${DELUGEUI_BINARY} ]] ; then
+		   ebegin "Starting Deluge UI"
+		   start-stop-daemon --start --background --pidfile \
+		   /var/run/deluge.pid  --make-pidfile \
+		   --exec ${DELUGEUI_BINARY} -c "${DELUGED_USER}" \
+		   -e HOME="${DELUGED_USER_HOME}" -- ${DELUGEUI_OPTS}
+		   eend $?
+		fi
 	fi
 }
 
@@ -63,9 +66,12 @@ stop() {
 
 
 	if [[ "${DELUGEUI_START}" == "true" ]] ; then
-		ebegin "Stopping Deluge"
-		start-stop-daemon --stop --user "${DELUGED_USER}" \
-		--name deluge --pidfile /var/run/deluge.pid
-		eend $?
+		DELUGEUI_BINARY="$(which deluge-${DELUGEUI_TYPE})"
+		if [[ -x ${DELUGEUI_BINARY} ]] ; then
+		   ebegin "Stopping Deluge UI"
+		   start-stop-daemon --stop --user "${DELUGED_USER}" \
+		   --name ${DELUGEUI_BINARY} --pidfile /var/run/deluge.pid
+		   eend $?
+		fi
 	fi
 }
